@@ -1,0 +1,18 @@
+[
+{
+  "modid": "proceduralgalaxy",
+  "name": "Procedural Galaxy",
+  "description": "An addon for GalactiCraft",
+  "version": "0.0.0",
+  "mcversion": "1.7.0",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["katzenpapst"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": [
+    "GalacticraftCore"
+  ]
+}
+]
