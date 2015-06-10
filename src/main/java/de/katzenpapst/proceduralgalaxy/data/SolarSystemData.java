@@ -8,8 +8,9 @@ import micdoodle8.mods.galacticraft.api.vector.Vector3;
 
 public class SolarSystemData extends GenericData {
 	public Vector3 mapPosition = new Vector3(0,0,0);
+	
 	// something like an ID for my SolarSystems
-	public int index = 0;
+	public int solarSystemID = 0;
 	
 	public StarData mainStar = null;
 	
@@ -25,7 +26,7 @@ public class SolarSystemData extends GenericData {
 		
 		mapPosition = loadVector3(vec);
 		
-		index = nbt.getInteger("index");
+		solarSystemID = nbt.getInteger("solarSystemID");
 		
 		mainStar = new StarData();
 		mainStar.loadFromNbt(nbt.getCompoundTag("mainStar"));
@@ -51,7 +52,7 @@ public class SolarSystemData extends GenericData {
 		super.saveToNbt(nbt);
 		
 		nbt.setTag("mapPosition", saveVector3(mapPosition));
-		nbt.setInteger("index", index);
+		nbt.setInteger("solarSystemID", solarSystemID);
 		
 		NBTTagCompound starData = new NBTTagCompound ();
 		mainStar.saveToNbt(starData);

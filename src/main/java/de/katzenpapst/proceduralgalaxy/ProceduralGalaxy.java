@@ -93,64 +93,22 @@ public class ProceduralGalaxy {
     	FMLCommonHandler.instance().bus().register(new TickHandlerServer());
     	//event.getSide().isServer()
     }
-    
-    protected void loadSolarSystem(SolarSystemData data) {
-    	// damn. Now, how did that work again?
-    	DynamicSolarSystem sys = new DynamicSolarSystem(data.displayName, "milkyWay");
-    	sys.setMapPosition(data.mapPosition);
-    	
-    	DynamicStar star = new DynamicStar(data.mainStar.displayName);
-    	
-    	star.setBodyIcon(new ResourceLocation(ASSET_PREFIX, "textures/gui/celestialbodies/"+data.mainStar.celestialBodyIcon+".png"));
-    	star.setParentSolarSystem(sys);
-    	sys.setMainStar(star);
-    	
-    	star.setRelativeSize(data.mainStar.relativeSize);
-    	
-    	GalaxyRegistry.registerSolarSystem(sys);
 
-    	
-    	for(int p=0;p<data.planets.size();p++) {
-    		PlanetData pData = data.planets.get(p);
-    		DynamicPlanet planet = new DynamicPlanet(pData.displayName);
-    		planet.setBodyIcon(new ResourceLocation(ASSET_PREFIX, "textures/gui/celestialbodies/"+pData.celestialBodyIcon+".png"));
-    		planet.setParentSolarSystem(sys);
-    		planet.setPhaseShift(pData.phaseShift);
-    		planet.setRelativeDistanceFromCenter(new ScalableDistance(pData.distanceFromCenter,pData.distanceFromCenter));
-    		planet.setRelativeOrbitTime(pData.relativeOrbitTime);
-    		planet.setRelativeSize(pData.relativeSize);
-    		planet.setTierRequired(configMgr.getPlanetTier());
-    		
-    		GalaxyRegistry.registerPlanet(planet);
-    		
-    		for(int m=0;m<pData.moons.size();m++) {
-    			MoonData mData = pData.moons.get(m);
-    			DynamicMoon moon = new DynamicMoon(mData.displayName);
-    			moon.setBodyIcon(new ResourceLocation(ASSET_PREFIX, "textures/gui/celestialbodies/"+mData.celestialBodyIcon+".png"));
-    			moon.setParentPlanet(planet);    			
-    			moon.setPhaseShift(mData.phaseShift);
-    			moon.setRelativeDistanceFromCenter(new ScalableDistance(mData.distanceFromCenter,mData.distanceFromCenter));
-    			moon.setRelativeOrbitTime(mData.relativeOrbitTime);
-    			moon.setRelativeSize(mData.relativeSize);
-    			moon.setTierRequired(configMgr.getMoonTier());
-    			
-    			GalaxyRegistry.registerMoon(moon);
-    		}
-    	}
-    	
-    	GalaxyRegistry.refreshGalaxies();
-    	
-    }
-    
-    public SolarSystem createNewSolarSystem() {
+    /**
+     * Okay, I admit I'm not sure how exactly synchronized works, or in what thread these
+     * minecraft server <---> client messages are processed. But I *think* this here
+     * *might* prevent race conditions. This is the method which should be called from 
+     * @return
+     */
+    synchronized public SolarSystem createNewSolarSystem(String forUser) {
     	if(debugDoOnce) return null;
     	debugDoOnce = true;
     	// I should figure out how to do this on serverside only
-    	SolarSystemGenerator gen = new SolarSystemGenerator();
+    	
 	    try{
-	    	SolarSystemData data = gen.generate(0);
-	    	loadSolarSystem(data);
+	    	TickHandlerServer.ssData.generateNew(forUser);
 	    } catch (CannotGenerateException e) {
+	    	// think of some useful error handling, or just die if this happens?
 			return null;
 		}
     	return null;

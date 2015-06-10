@@ -148,9 +148,10 @@ public class SolarSystemGenerator {
 	 * @TODO figure out how to make this run server-side only
 	 * 
 	 * @param nr
+	 * @param forUser: name of the user who clicked, aka, this should be the one wo can rename the celestial bodies later
 	 * @return
 	 */
-	public SolarSystemData generate(int nr) throws CannotGenerateException {
+	public SolarSystemData generate(int nr, String forUser) throws CannotGenerateException {
 		
 		long seed = worldSeed ^ nr ^ SALT;
 		RandomGenerator generator = new RandomGenerator(seed);
@@ -160,13 +161,14 @@ public class SolarSystemGenerator {
 		
 		String systemName = getSystemName(generator);
 		sys.displayName = systemName;
-		sys.index = nr;
+		sys.solarSystemID = nr;
 		sys.mapPosition  = getSystemPosition(generator);
 		sys.unlocalizedName = systemName.toLowerCase()+"_system";
 
 		// now the star
 		StarData star = new StarData();
 		sys.mainStar = star;
+		star.discovererName = forUser;
 		star.size = 0.1F+generator.nextFloat();
 		star.brightness = (float) generator.nextDouble(0.1, 2.5);
 		

@@ -115,6 +115,8 @@ public class SimplePacketPG implements IPacket {
         GCPlayerStats stats = GCEntityPlayerMP.getPlayerStats(playerBase);*/
     	switch(this.type) {
     	case S_GENERATE_SOLAR_SYSTEM:
+    		// now try to actually do this
+    		
     		break;
 		default:
 			break;
