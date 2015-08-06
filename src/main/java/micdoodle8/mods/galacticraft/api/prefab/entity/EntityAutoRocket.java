@@ -8,6 +8,7 @@ import cpw.mods.fml.relauncher.SideOnly;
 import io.netty.buffer.ByteBuf;
 import micdoodle8.mods.galacticraft.api.entity.IDockable;
 import micdoodle8.mods.galacticraft.api.entity.IEntityNoisy;
+import micdoodle8.mods.galacticraft.api.entity.ILandable;
 import micdoodle8.mods.galacticraft.api.tile.IFuelDock;
 import micdoodle8.mods.galacticraft.api.tile.ILandingPadAttachable;
 import micdoodle8.mods.galacticraft.api.vector.BlockVec3;
@@ -55,7 +56,7 @@ import java.util.List;
 /**
  * Do not include this prefab class in your released mod download.
  */
-public abstract class EntityAutoRocket extends EntitySpaceshipBase implements IDockable, IInventory, IPacketReceiver, IEntityNoisy
+public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ILandable, IInventory, IPacketReceiver, IEntityNoisy
 {
     public FluidTank fuelTank = new FluidTank(this.getFuelTankCapacity() * ConfigManagerCore.rocketFuelFactor);
     public int destinationFrequency = -1;
@@ -68,6 +69,7 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
 
     public int autoLaunchCountdown;
     public String statusMessage;
+    public String statusColour;
     public int statusMessageCooldown;
     public int lastStatusMessageCooldown;
     public boolean statusValid;
@@ -87,7 +89,7 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
     {
         this(world);
         this.setSize(0.98F, 2F);
-        this.yOffset = this.height / 2.0F;
+        this.yOffset = 0;
         this.setPosition(posX, posY, posZ);
         this.motionX = 0.0D;
         this.motionY = 0.0D;
@@ -110,12 +112,14 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
                 if (!this.setFrequency())
                 {
                     this.destinationFrequency = -1;
-                    this.statusMessage = "\u00a7c" + StatCollector.translateToLocal("gui.message.frequency.name") + "#\u00a7c" + StatCollector.translateToLocal("gui.message.notSet.name");
+                    this.statusMessage = StatCollector.translateToLocal("gui.message.frequency.name") + "#" + StatCollector.translateToLocal("gui.message.notSet.name");
+                    this.statusColour = "\u00a7c";
                     return false;
                 }
                 else
                 {
-                    this.statusMessage = "\u00a7a" + StatCollector.translateToLocal("gui.message.success.name");
+                    this.statusMessage = StatCollector.translateToLocal("gui.message.success.name");
+                    this.statusColour = "\u00a7a";
                     return true;
                 }
             }
@@ -123,7 +127,8 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
         else
         {
             this.destinationFrequency = -1;
-            this.statusMessage = "\u00a7c" + StatCollector.translateToLocal("gui.message.notEnough.name") + "#\u00a7c" + StatCollector.translateToLocal("gui.message.fuel.name");
+            this.statusMessage = StatCollector.translateToLocal("gui.message.notEnough.name") + "#" + StatCollector.translateToLocal("gui.message.fuel.name");
+            this.statusColour = "\u00a7c";
             return false;
         }
 
@@ -406,13 +411,13 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
             {
                 if (this.landing && this.targetVec != null && this.worldObj.getTileEntity(this.targetVec.x, this.targetVec.y, this.targetVec.z) instanceof IFuelDock)
                 {
-                	this.motionY = (this.posY - this.getOnPadYOffset() - 0.4D - this.targetVec.y) / -100.0D;
-
-                	if (this.posY - this.targetVec.y < 5)
+                	this.motionY = Math.max(-2.0F, (this.posY - this.getOnPadYOffset() - 0.4D - this.targetVec.y) / -70.0D);
+                	
+                	if (this.boundingBox.minY - this.targetVec.y < 0.5F)
 	                {
 	                    for (int x = MathHelper.floor_double(this.posX) - 1; x <= MathHelper.floor_double(this.posX) + 1; x++)
 	                    {
-	                        for (int y = MathHelper.floor_double(this.posY - this.getOnPadYOffset() - 0.45D); y <= MathHelper.floor_double(this.posY) + 1; y++)
+	                        for (int y = MathHelper.floor_double(this.boundingBox.minY - this.getOnPadYOffset() - 0.45D) - 1; y <= MathHelper.floor_double(this.boundingBox.maxY) + 1; y++)
 	                        {
 	                            for (int z = MathHelper.floor_double(this.posZ) - 1; z <= MathHelper.floor_double(this.posZ) + 1; z++)
 	                            {
@@ -504,7 +509,7 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
 
     public abstract boolean isPlayerRocket();
 
-    protected void landRocket(int x, int y, int z)
+    public void landEntity(int x, int y, int z)
     {
         TileEntity tile = this.worldObj.getTileEntity(x, y, z);
 
@@ -703,6 +708,8 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
 	        	}
 	        }
         }
+        this.statusColour = ByteBufUtils.readUTF8String(buffer);
+        if (this.statusColour.equals("")) this.statusColour = null;
     }
 
     @Override
@@ -744,6 +751,7 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
         {
         	list.add(this.riddenByEntity == null ? -1 : this.riddenByEntity.getEntityId());
         }
+        list.add(this.statusColour != null ? this.statusColour : "");
     }
 
     @Override
@@ -765,7 +773,7 @@ public abstract class EntityAutoRocket extends EntitySpaceshipBase implements ID
 
                                 if (tile instanceof IFuelDock)
                                 {
-                                    this.landRocket(x, y, z);
+                                    this.landEntity(x, y, z);
                                     return;
                                 }
                             }

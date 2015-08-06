@@ -22,7 +22,7 @@ group= "de.katzenpapst.proceduralGalaxy" // http://maven.apache.org/guides/mini/
 archivesBaseName = "proceduralgalaxy"
 
 minecraft {
-    version = "1.7.10-10.13.3.1373-1.7.10"
+    version = "1.7.10-10.13.4.1492-1.7.10"
     runDir = "eclipse"
 }
 
@@ -59,11 +59,5 @@ processResources
     // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
-    }
-}
-
-jar {
-        manifest {
-            attributes 'FMLAT': 'accessTransformer.cfg'
     }
 }
