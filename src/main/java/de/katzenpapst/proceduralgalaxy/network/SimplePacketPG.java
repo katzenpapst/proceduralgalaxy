@@ -106,13 +106,13 @@ public class SimplePacketPG implements IPacket {
 	@Override
 	public void handleClientSide(EntityPlayer player) {
 		switch(this.type) {
-		case C_SOLAR_SYSTEM_GENERATED: 
+		/*case C_SOLAR_SYSTEM_GENERATED: 
 			DynamicSolarSystem sys =  (DynamicSolarSystem)this.data.get(0);
 			
 			break;
 		case C_SOLAR_SYSTEM_GENERATION_FAILED:
 			
-			break;
+			break;*/
 		default:
 			break;
 		}
@@ -126,7 +126,7 @@ public class SimplePacketPG implements IPacket {
 		
         /*GCPlayerStats stats = GCEntityPlayerMP.getPlayerStats(playerBase);*/
     	switch(this.type) {
-    	case S_GENERATE_SOLAR_SYSTEM:
+    	/*case S_GENERATE_SOLAR_SYSTEM:
     		// now try to actually do this
     		UUID senderId = (UUID) this.data.get(0);
     		if(!senderId.equals(playerBase.getGameProfile().getId())) {
@@ -137,7 +137,7 @@ public class SimplePacketPG implements IPacket {
     		}
     		
     		
-    		break;
+    		break;*/
 		default:
 			break;
     	}
