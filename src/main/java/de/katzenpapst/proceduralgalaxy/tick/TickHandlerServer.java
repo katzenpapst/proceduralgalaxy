@@ -4,7 +4,7 @@ import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.TickEvent;
-// import de.katzenpapst.proceduralgalaxy.SolarSystemManager;
+import de.katzenpapst.proceduralgalaxy.SolarSystemManager;
 import de.katzenpapst.proceduralgalaxy.data.SolarSystemData;
 
 
@@ -16,11 +16,11 @@ import de.katzenpapst.proceduralgalaxy.data.SolarSystemData;
  */
 public class TickHandlerServer {
 	
-	// public static SolarSystemManager ssData = null;
+	public static SolarSystemManager ssData = null;
 	
 	public static void restart()
     {
-		// ssData = null;
+		ssData = null;
     }
 
     @SubscribeEvent
@@ -29,12 +29,12 @@ public class TickHandlerServer {
     	
         if (event.phase == TickEvent.Phase.START)
         {
-            /*if (TickHandlerServer.ssData == null)
+            if (TickHandlerServer.ssData == null)
             {
                 World world = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);
                 
                 ssData = SolarSystemManager.initWorldData(world);
-            }*/
+            }
             
             /*
              * World world0 = FMLCommonHandler.instance().getMinecraftServerInstance().worldServerForDimension(0);

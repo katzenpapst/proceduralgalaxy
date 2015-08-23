@@ -27,10 +27,10 @@ public class GuiHandler implements IGuiHandler {
 	 @SideOnly(Side.CLIENT)
     private Object getClientGuiElement(int ID, EntityPlayer player, World world, Vector3 position)
     {
-		/*if (ID == 1)
+		if (ID == 1)
         {
             return new GuiObservatory(null);
-        }*/
+        }
 		 return null;
 	 
     }

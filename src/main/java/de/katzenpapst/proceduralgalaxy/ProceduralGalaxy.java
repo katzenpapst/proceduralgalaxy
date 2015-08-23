@@ -43,7 +43,7 @@ import de.katzenpapst.proceduralgalaxy.gui.GuiHandler;
 import de.katzenpapst.proceduralgalaxy.network.PGChannelHandler;
 import de.katzenpapst.proceduralgalaxy.network.SimplePacketPG;
 import de.katzenpapst.proceduralgalaxy.tick.TickHandlerServer;
-// import de.katzenpapst.proceduralgalaxy.worldgen.SolarSystemGenerator;
+import de.katzenpapst.proceduralgalaxy.worldgen.SolarSystemGenerator;
 import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicMoon;
 import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicPlanet;
 import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicSolarSystem;
@@ -71,6 +71,8 @@ public class ProceduralGalaxy {
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
+        TestBlock b = new TestBlock();
+        GameRegistry.registerBlock(b, "dafuqBlockTest");
         
         channelHandler = PGChannelHandler.init();
     }
@@ -96,5 +98,32 @@ public class ProceduralGalaxy {
     	//event.getSide().isServer()
     }
 
-   
+    /**
+     * Okay, I admit I'm not sure how exactly synchronized works, or in what thread these
+     * minecraft server <---> client messages are processed. But I *think* this here
+     * *might* prevent race conditions. This is the method which should be called from 
+     * @return
+     */
+    synchronized public SolarSystem createNewSolarSystem(EntityPlayerMP forUser) {
+	    try{
+	    	DynamicSolarSystem sys = TickHandlerServer.ssData.generateNew(forUser.getUniqueID());
+	    	ProceduralGalaxy.instance.getChannelHandler().sendToPlayer(new SimplePacketPG(
+	    				SimplePacketPG.EnumSimplePacketPG.C_SOLAR_SYSTEM_GENERATED,
+	    				new Object[] {
+    						sys
+	    				}
+	    			), forUser);
+	    } catch (CannotGenerateException e) {
+	    	// C_SOLAR_SYSTEM_GENERATION_FAILED
+	    	ProceduralGalaxy.instance.getChannelHandler().sendToPlayer(new SimplePacketPG(
+    				SimplePacketPG.EnumSimplePacketPG.C_SOLAR_SYSTEM_GENERATION_FAILED,
+    				new Object[] {
+						e
+    				}
+    			), forUser);
+	    	// think of some useful error handling, or just die if this happens?
+			return null;
+		}
+    	return null;
+    }
 }
