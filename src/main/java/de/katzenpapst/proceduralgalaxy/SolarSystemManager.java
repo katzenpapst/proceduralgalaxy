@@ -2,6 +2,7 @@ package de.katzenpapst.proceduralgalaxy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 import de.katzenpapst.proceduralgalaxy.config.ConfigManager;
 import de.katzenpapst.proceduralgalaxy.data.MoonData;
@@ -45,8 +46,7 @@ public class SolarSystemManager extends WorldSavedData {
 		super(p_i2141_1_);
 
 		configMgr = ProceduralGalaxy.instance.getConfigManager();
-		solarSystemDataStorage = new HashMap<Integer, SolarSystemData>(); 
-		generator = new SolarSystemGenerator(); 
+		solarSystemDataStorage = new HashMap<Integer, SolarSystemData>();
 	}
 	
 	/**
@@ -56,9 +56,10 @@ public class SolarSystemManager extends WorldSavedData {
 	 * @return
 	 * @throws CannotGenerateException
 	 */
-	public DynamicSolarSystem generateNew(String username) throws CannotGenerateException {
+	public DynamicSolarSystem generateNew(UUID userId) throws CannotGenerateException {
 		
-		SolarSystemData data = generator.generate(highestId+1, username);
+		SolarSystemGenerator generator = new SolarSystemGenerator (userId);
+		SolarSystemData data = generator.generate(highestId+1);
 		DynamicSolarSystem generatedSystem = addSolarSystem(data);
 
 		doneGenerating();

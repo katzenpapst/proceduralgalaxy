@@ -1,6 +1,7 @@
 package de.katzenpapst.proceduralgalaxy.network;
 import java.util.EnumMap;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import micdoodle8.mods.galacticraft.core.Constants;
@@ -64,6 +65,12 @@ public class PGChannelHandler extends FMLIndexedMessageToMessageCodec<IPacket>{
     	if (FMLCommonHandler.instance().getSide() != Side.CLIENT) return;
     	this.channels.get(Side.CLIENT).attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.TOSERVER);
         this.channels.get(Side.CLIENT).writeOutbound(message);
+    }
+    
+    public void sendToPlayer(IPacket message, EntityPlayerMP player) {
+    	 this.channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGET).set(FMLOutboundHandler.OutboundTarget.PLAYER);
+         this.channels.get(Side.SERVER).attr(FMLOutboundHandler.FML_MESSAGETARGETARGS).set(player);
+         this.channels.get(Side.SERVER).writeOutbound(message);
     }
 
 }

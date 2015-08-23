@@ -3,15 +3,21 @@ package de.katzenpapst.proceduralgalaxy.network;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import io.netty.buffer.ByteBuf;
 import micdoodle8.mods.galacticraft.core.network.NetworkUtil;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import micdoodle8.mods.galacticraft.core.network.IPacket;
+import micdoodle8.mods.galacticraft.core.util.PlayerUtil;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
+import de.katzenpapst.proceduralgalaxy.ProceduralGalaxy;
 import de.katzenpapst.proceduralgalaxy.data.SolarSystemData;
+import de.katzenpapst.proceduralgalaxy.exception.CannotGenerateException;
+import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicSolarSystem;
 
 
 public class SimplePacketPG implements IPacket {
@@ -22,7 +28,8 @@ public class SimplePacketPG implements IPacket {
         S_GENERATE_SOLAR_SYSTEM(Side.SERVER, String.class),
         
         // CLIENT
-        C_SOLAR_SYSTEM_GENERATED(Side.CLIENT, SolarSystemData.class);
+        C_SOLAR_SYSTEM_GENERATED(Side.CLIENT, SolarSystemData.class),
+        C_SOLAR_SYSTEM_GENERATION_FAILED(Side.CLIENT, CannotGenerateException.class);
     
 		private Side targetSide;
         private Class<?>[] decodeAs;
@@ -100,6 +107,10 @@ public class SimplePacketPG implements IPacket {
 	public void handleClientSide(EntityPlayer player) {
 		switch(this.type) {
 		case C_SOLAR_SYSTEM_GENERATED: 
+			DynamicSolarSystem sys =  (DynamicSolarSystem)this.data.get(0);
+			
+			break;
+		case C_SOLAR_SYSTEM_GENERATION_FAILED:
 			
 			break;
 		default:
@@ -111,11 +122,20 @@ public class SimplePacketPG implements IPacket {
     // @SideOnly(Side.SERVER)
 	@Override
 	public void handleServerSide(EntityPlayer player) {
-		/*EntityPlayerMP playerBase = PlayerUtil.getPlayerBaseServerFromPlayer(player, false);
-        GCPlayerStats stats = GCEntityPlayerMP.getPlayerStats(playerBase);*/
+		EntityPlayerMP playerBase = PlayerUtil.getPlayerBaseServerFromPlayer(player, false);
+		
+        /*GCPlayerStats stats = GCEntityPlayerMP.getPlayerStats(playerBase);*/
     	switch(this.type) {
     	case S_GENERATE_SOLAR_SYSTEM:
     		// now try to actually do this
+    		UUID senderId = (UUID) this.data.get(0);
+    		if(!senderId.equals(playerBase.getGameProfile().getId())) {
+    			// I doubt that this could actually happen...
+    			System.out.print("Stuff happened");
+    		} else {
+    			ProceduralGalaxy.instance.createNewSolarSystem(playerBase);
+    		}
+    		
     		
     		break;
 		default:

@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Maps;
 
+import cpw.mods.fml.client.FMLClientHandler;
 import de.katzenpapst.proceduralgalaxy.ProceduralGalaxy;
 import de.katzenpapst.proceduralgalaxy.network.SimplePacketPG;
 import micdoodle8.mods.galacticraft.api.galaxies.CelestialBody;
@@ -52,7 +53,14 @@ public class GuiObservatory extends GuiCelestialSelection {
 					
 					@Override
 					public void doAction() {
-						ProceduralGalaxy.instance.getChannelHandler().sendToServer(new SimplePacketPG(SimplePacketPG.EnumSimplePacketPG.S_GENERATE_SOLAR_SYSTEM, new Object[] { "dafuq test" }));
+						ProceduralGalaxy.instance.getChannelHandler().sendToServer(
+							new SimplePacketPG(
+								SimplePacketPG.EnumSimplePacketPG.S_GENERATE_SOLAR_SYSTEM, 
+								new Object[] { 
+										FMLClientHandler.instance().getClient().thePlayer.getGameProfile().getId()
+								}
+							)
+						);
 						/*
 						ProceduralGalaxy.instance.createNewSolarSystem();
 						try {

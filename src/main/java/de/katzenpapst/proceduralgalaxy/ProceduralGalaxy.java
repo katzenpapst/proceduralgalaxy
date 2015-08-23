@@ -17,10 +17,13 @@ import micdoodle8.mods.galacticraft.core.GalacticraftCore;
 import micdoodle8.mods.galacticraft.core.dimension.TeleportTypeMoon;
 import micdoodle8.mods.galacticraft.core.dimension.WorldProviderMoon;
 import micdoodle8.mods.galacticraft.core.util.ConfigManagerCore;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.WorldProvider;
 import net.minecraftforge.common.config.Configuration;
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
@@ -38,6 +41,7 @@ import de.katzenpapst.proceduralgalaxy.data.StarData;
 import de.katzenpapst.proceduralgalaxy.exception.CannotGenerateException;
 import de.katzenpapst.proceduralgalaxy.gui.GuiHandler;
 import de.katzenpapst.proceduralgalaxy.network.PGChannelHandler;
+import de.katzenpapst.proceduralgalaxy.network.SimplePacketPG;
 import de.katzenpapst.proceduralgalaxy.tick.TickHandlerServer;
 import de.katzenpapst.proceduralgalaxy.worldgen.SolarSystemGenerator;
 import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicMoon;
@@ -100,14 +104,23 @@ public class ProceduralGalaxy {
      * *might* prevent race conditions. This is the method which should be called from 
      * @return
      */
-    synchronized public SolarSystem createNewSolarSystem(String forUser) {
-    	if(debugDoOnce) return null;
-    	debugDoOnce = true;
-    	// I should figure out how to do this on serverside only
-    	
+    synchronized public SolarSystem createNewSolarSystem(EntityPlayerMP forUser) {
 	    try{
-	    	TickHandlerServer.ssData.generateNew(forUser);
+	    	DynamicSolarSystem sys = TickHandlerServer.ssData.generateNew(forUser.getUniqueID());
+	    	ProceduralGalaxy.instance.getChannelHandler().sendToPlayer(new SimplePacketPG(
+	    				SimplePacketPG.EnumSimplePacketPG.C_SOLAR_SYSTEM_GENERATED,
+	    				new Object[] {
+    						sys
+	    				}
+	    			), forUser);
 	    } catch (CannotGenerateException e) {
+	    	// C_SOLAR_SYSTEM_GENERATION_FAILED
+	    	ProceduralGalaxy.instance.getChannelHandler().sendToPlayer(new SimplePacketPG(
+    				SimplePacketPG.EnumSimplePacketPG.C_SOLAR_SYSTEM_GENERATION_FAILED,
+    				new Object[] {
+						e
+    				}
+    			), forUser);
 	    	// think of some useful error handling, or just die if this happens?
 			return null;
 		}

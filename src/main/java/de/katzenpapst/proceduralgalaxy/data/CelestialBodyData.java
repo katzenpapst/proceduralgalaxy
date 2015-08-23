@@ -1,6 +1,7 @@
 package de.katzenpapst.proceduralgalaxy.data;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -16,7 +17,8 @@ public class CelestialBodyData extends GenericData {
 	public float distanceFromCenter = 1.0F;
     public float relativeOrbitTime = 1.0F;
     public float phaseShift = 0.0F;
-    public String discovererName = null;
+    //public String discovererName = null;
+    public UUID discovererUUID = null;
     
 
 
@@ -39,10 +41,10 @@ public class CelestialBodyData extends GenericData {
     	
     	celestialBodyIcon = nbt.getString("celestialBodyIcon");
     	
-    	if(nbt.hasKey("discovererName")) {
-    		discovererName = nbt.getString("discovererName");
+    	if(nbt.hasKey("discovererUUID")) {
+    		discovererUUID = UUID.fromString(nbt.getString("discovererUUID"));
     	} else {
-    		discovererName = null;
+    		discovererUUID = null;
     	}
 
 		return true;
@@ -58,8 +60,8 @@ public class CelestialBodyData extends GenericData {
     	nbt.setFloat("phaseShift",phaseShift);
     	
     	nbt.setString("celestialBodyIcon", celestialBodyIcon);
-    	if(discovererName != null) {
-    		nbt.setString("discovererName",discovererName);
+    	if(discovererUUID != null) {
+    		nbt.setString("discovererUUID",discovererUUID.toString());
     	}
 		
 		

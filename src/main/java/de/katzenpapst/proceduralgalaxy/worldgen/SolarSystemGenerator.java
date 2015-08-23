@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.vecmath.Vector2d;
 
@@ -94,7 +95,7 @@ public class SolarSystemGenerator {
 	}
 	
 	
-	private String discoverer = null;
+	private UUID discoverer = null;
 
 	private float hZoneWidth = ProceduralGalaxy.instance.getConfigManager().getHabitableZoneWidth();
 	
@@ -114,8 +115,8 @@ public class SolarSystemGenerator {
 	Map <String, SolarSystem> registeredSystems;
 
 	
-	public SolarSystemGenerator() {
-		
+	public SolarSystemGenerator(UUID userId) {
+		discoverer = userId;
 		worldSeed = Minecraft.getMinecraft().theWorld.getSeed();
 		configManager = ProceduralGalaxy.instance.getConfigManager();
 		
@@ -126,10 +127,6 @@ public class SolarSystemGenerator {
 		_pressure_gas_t = MAX_ROCKY_PRESSURE - _pressure_rocky_m * MAX_PLANET_SIZE;
 		
 		updateSystemList();
-	}
-	
-	public void setDiscoverer(String name) {
-		discoverer = name;
 	}
 	
 	/**
@@ -151,7 +148,7 @@ public class SolarSystemGenerator {
 	 * @param forUser: name of the user who clicked, aka, this should be the one wo can rename the celestial bodies later
 	 * @return
 	 */
-	public SolarSystemData generate(int nr, String forUser) throws CannotGenerateException {
+	public SolarSystemData generate(int nr) throws CannotGenerateException {
 		
 		long seed = worldSeed ^ nr ^ SALT;
 		RandomGenerator generator = new RandomGenerator(seed);
@@ -168,7 +165,7 @@ public class SolarSystemGenerator {
 		// now the star
 		StarData star = new StarData();
 		sys.mainStar = star;
-		star.discovererName = forUser;
+		star.discovererUUID = discoverer;
 		star.size = 0.1F+generator.nextFloat();
 		star.brightness = (float) generator.nextDouble(0.1, 2.5);
 		
@@ -180,10 +177,6 @@ public class SolarSystemGenerator {
 		star.displayName = systemName;
 		star.relativeSize = 1F+star.size;
 		star.unlocalizedName = systemName.toLowerCase()+"_star";
-		
-		if(discoverer != null) {
-			star.discovererName = discoverer;
-		}
 		
 		
 		// now generate planets
@@ -305,7 +298,7 @@ public class SolarSystemGenerator {
 	protected void generateLandeable(LandeableData data, RandomGenerator gen, double brightness, CelestialBodyData parent, int bodyNumber, int maxSize) {
 		
 		
-		
+		data.discovererUUID = discoverer;
 		// size. 
 		// while it might seem that in our system the planets are big at medium distance
 		// and get smaller closer and further away from the sun, if you actually
@@ -404,7 +397,7 @@ public class SolarSystemGenerator {
 		data.dayLength = (long)1000*gen.nextInt(MIN_DAY_LENGTH, MAX_DAY_LENGTH+1);
 		
 		if(discoverer != null) {
-			data.discovererName = discoverer;
+			data.discovererUUID = discoverer;
 		}
 		
 		if(parent instanceof StarData) {
