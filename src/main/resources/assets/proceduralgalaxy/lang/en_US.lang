@@ -1,2 +1,8 @@
 tile.dafuqBlockTest.name=Observatory
 gui.message.solarsystem.create.name=Search
+star.sunRa=Ra
+planet.osiris=Osiris
+planet.baal=Baal
+planet.anubis=Anubis
+solarsystem.systemRa=Amun-Ra
+planet.sunAmun=Amun

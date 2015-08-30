@@ -52,7 +52,7 @@ import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicStar;
 @Mod(modid=ProceduralGalaxy.MODID, name=ProceduralGalaxy.MODNAME, version=ProceduralGalaxy.VERSION,  dependencies = "required-after:GalacticraftCore") //Tell forge "Oh hey, there's a new mod here to load."
 
 public class ProceduralGalaxy {
-	public static final String MODNAME = "Procedural Galaxy";
+	public static final String MODNAME = "Pra's GC Mod";
 	public static final String MODID = "proceduralgalaxy";
 	public static final String VERSION = "0.0.0";
     public static final String ASSET_PREFIX = MODID;
@@ -60,6 +60,10 @@ public class ProceduralGalaxy {
     protected ConfigManager configMgr;
     
     public static Moon moonTutorial;
+    public Star starRa;
+    public Planet starAmun;
+    public SolarSystem systemRa;
+    
     protected boolean debugDoOnce = false;
     
     private PGChannelHandler channelHandler;
@@ -72,9 +76,63 @@ public class ProceduralGalaxy {
     public void init(FMLInitializationEvent event)
     {
         TestBlock b = new TestBlock();
-        GameRegistry.registerBlock(b, "dafuqBlockTest");
+        GameRegistry.registerBlock(b, "blockObservatory");
+    	createCelestialObjects();
         
         channelHandler = PGChannelHandler.init();
+    }
+    
+    private void createCelestialObjects() {
+    	systemRa = new SolarSystem("systemRa", "milkyWay").setMapPosition(new Vector3(2.5F, -1.15F, 0.0F));
+    	
+    	starRa = new Star("sunRa").setParentSolarSystem(systemRa);
+    	starRa.setBodyIcon(new ResourceLocation(ASSET_PREFIX, "textures/gui/celestialbodies/sun-red2.png"));
+    	starRa.setRelativeSize(1);
+    	starRa.setTierRequired(-1);
+    	
+    	systemRa.setMainStar(starRa);
+    	
+    	
+    	
+    	
+    	
+    	
+    	// planets
+    	
+    	
+    	Planet planetOsiris = makePlanet("osiris", "planet-desert.png", 0.5F, 0.25F, 3, 0.5F);
+    	
+    	planetOsiris.setParentSolarSystem(systemRa);
+ 
+    	//planetOsiris.setRelativeSize(0.1F);
+    	
+    	starAmun = makePlanet("sunAmun", "sun-white.png", (float) Math.PI*3/4, 0.4F, 3, 9F);
+    	starAmun.setParentSolarSystem(systemRa);
+    	
+    	Planet planetBaal = makePlanet("baal", "planet-gas02.png", (float)Math.PI*1/9, 0.7F, 3, 9F);
+    	planetBaal.setParentSolarSystem(systemRa);
+    	
+    	Planet planetAnubis = makePlanet("anubis", "planet-desert.png", (float)Math.PI*4/5, 2F, 3, 9F);
+    	planetAnubis.setParentSolarSystem(systemRa);
+    	
+    	GalaxyRegistry.registerSolarSystem(systemRa);
+    	GalaxyRegistry.registerPlanet(planetAnubis);
+    	GalaxyRegistry.registerPlanet(starAmun);
+    	GalaxyRegistry.registerPlanet(planetBaal);
+    	GalaxyRegistry.registerPlanet(planetOsiris);
+    }
+    
+    private Planet makePlanet(String name, String texture, float phaseShift, float distance, int tier, float orbitTime) {
+    	String textureName = "textures/gui/celestialbodies/";
+    	textureName = textureName.concat(texture);
+    	Planet result = new Planet(name);
+    	result.setBodyIcon(new ResourceLocation(ASSET_PREFIX, textureName));
+    	result.setPhaseShift(phaseShift);
+    	result.setRelativeDistanceFromCenter(new ScalableDistance(distance, distance));
+    	result.setTierRequired(tier);
+    	result.setRelativeOrbitTime(orbitTime);
+    	return result;
+    	
     }
     
     public PGChannelHandler getChannelHandler() {
