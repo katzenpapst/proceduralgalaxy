@@ -357,6 +357,7 @@ public class SolarSystemGenerator {
 		// let's try it like this. It should barely influence the temperature on low pressure,
 		// but quite a lot when it's high
 		data.temperature = brightness + Math.pow(gen.nextDouble(0, data.atmosphericPressure)/2,2);
+		data.sunBrightness = brightness;
 		float absoluteTemperature = (float)data.temperature*288;
 		// atmosphere
 		if(data.atmosphericPressure > 0) {

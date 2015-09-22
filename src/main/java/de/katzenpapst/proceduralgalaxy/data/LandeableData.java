@@ -16,7 +16,9 @@ public class LandeableData extends CelestialBodyData {
 		// gas giant
 		LT_GAS,
 		// micromoon. I hope I manage to do it... 
-		LT_MICRO
+		LT_MICRO,
+		// asteroid belt
+		LT_BELT
 	}
 	
 	public LandeableType landeableType = LandeableType.LT_ROCKY;
@@ -55,6 +57,9 @@ public class LandeableData extends CelestialBodyData {
     // public double horizon; // return this == FLAT ? 0.0D : 63.0D;
     
     public double temperature = 1.0F;
+    
+    // just save the brightness value here
+    public double sunBrightness = 1.0;
         
     // again, relative
     public double density = 1.0F;
@@ -73,6 +78,28 @@ public class LandeableData extends CelestialBodyData {
     
     // todo add ore lists, mob lists, villager lists  ets
     
+    public LandeableData() {
+    	
+    }
+    
+    public LandeableData(
+    		LandeableType landeableType, double atmosphericPressure, double bodyRadius, long dayLength, double temperature, double density, 
+    		String displayName, String bodyIcon, float relSize, float distFromCenter, float relOrbitTime, float phaseShift) {
+    	super(displayName, bodyIcon, relSize, distFromCenter, relOrbitTime,phaseShift);
+    	
+    	this.landeableType = landeableType;
+    	
+    	this.atmosphericPressure = atmosphericPressure;
+    	
+    	this.bodyRadius = bodyRadius;
+        
+        this.dayLength = dayLength ;
+
+        this.temperature = temperature ;
+        
+        this.density = density;
+    	
+    }
     
     /**
      * Calculates the value which should actually be set for a planet/moon
@@ -131,6 +158,9 @@ public class LandeableData extends CelestialBodyData {
 		dayLength = nbt.getLong("dayLength");
 		
 		landeableType = LandeableType.valueOf(nbt.getString("landeableType"));
+		
+		
+		sunBrightness = nbt.getDouble("sunBrightness");
 
 		
 		// do the atmospheres
@@ -158,9 +188,10 @@ public class LandeableData extends CelestialBodyData {
 	public void saveToNbt(NBTTagCompound nbt) {
 		super.saveToNbt(nbt);
 		
-		nbt.setInteger("displayName", dimensionID);
+		nbt.setInteger("dimensionID", dimensionID);
 		nbt.setDouble("atmosphericDensity",atmosphericPressure);
 		nbt.setDouble("bodySize",bodyRadius);
+		nbt.setDouble("sunBrightness",sunBrightness);
 		nbt.setLong("dayLength",dayLength);
 		
 		

@@ -30,6 +30,19 @@ public class CelestialBodyData extends GenericData {
     public float ringColorG = 1.0F;
     public float ringColorB = 1.0F;*/
     
+    public CelestialBodyData() {
+    	
+    }
+    
+    public CelestialBodyData(String displayName, String bodyIcon, float relSize, float distFromCenter, float relOrbitTime, float phaseShift) {
+    	this.displayName = displayName;
+    	this.celestialBodyIcon = bodyIcon;
+    	this.relativeSize = relSize;
+    	this.distanceFromCenter = distFromCenter;
+    	this.relativeOrbitTime = relOrbitTime;
+    	this.phaseShift = phaseShift;
+    }
+    
     @Override
 	public boolean loadFromNbt(NBTTagCompound nbt) {
     	if(!super.loadFromNbt(nbt)) return false;

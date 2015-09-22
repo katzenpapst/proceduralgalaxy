@@ -1,5 +1,8 @@
 package de.katzenpapst.proceduralgalaxy;
 
+import de.katzenpapst.proceduralgalaxy.data.LandeableData;
+import de.katzenpapst.proceduralgalaxy.worldgen.SolarSystemManager;
+import de.katzenpapst.proceduralgalaxy.worldgen.gas.GasDataLookup;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.IChunkProvider;
 import micdoodle8.mods.galacticraft.api.galaxies.CelestialBody;
@@ -8,73 +11,94 @@ import micdoodle8.mods.galacticraft.api.vector.Vector3;
 import micdoodle8.mods.galacticraft.api.world.IGalacticraftWorldProvider;
 import micdoodle8.mods.galacticraft.api.world.ISolarLevel;
 import micdoodle8.mods.galacticraft.core.util.ConfigManagerCore;
+import micdoodle8.mods.galacticraft.core.util.GCLog;
 
-public class TutorialWorldProvider extends WorldProviderSpace implements IGalacticraftWorldProvider, ISolarLevel {
+public class DynamicPlanetWorldProvider extends WorldProviderSpace implements IGalacticraftWorldProvider, ISolarLevel {
 
+	LandeableData curData = null;
+	
+	
 	@Override
-	public void setDimension(int var1)
+	public void setDimension(int var1) 
     {
         this.dimensionId = var1; // but why? this gets done anyway
-        // todo add special logic for dynamic planets
+
+        SolarSystemManager ssMgr = ProceduralGalaxy.instance.getSolarSystemManager();
+        if(ssMgr == null) {
+        	// this can't work, but how can I die here?
+        	GCLog.severe("No SS Mgr...");
+        }
+        
+        curData = ssMgr.getDataByDimId(dimensionId);
+        
         super.setDimension(var1);
     }
 	
 	@Override
 	public float getGravity() {
-		return 0.072F;
+		return (float) curData.getGravitySubtrahend();
 	}
 
 	@Override
 	public double getMeteorFrequency() {
-		return 7.0D;
+		double tmp = 1-curData.atmosphericPressure;
+		if(tmp < 0)
+			tmp = 0;
+		// maybe do some stuff to check if we have an asteroid belt nearby
+		return tmp*7.0D;
 	}
 
 	@Override
 	public double getFuelUsageMultiplier() {
-		return 0.7D;
+		return curData.getGravityFactor();
 	}
 
 	@Override
 	public boolean canSpaceshipTierPass(int tier) {
-		return tier > 0;
+		return tier > ProceduralGalaxy.instance.getConfigManager().getPlanetTier();
 	}
 
 	@Override
 	public float getFallDamageModifier() {
-		return 0.18F;
+		// not sure about that...
+		return (float) curData.getGravityFactor();
 	}
 
 	@Override
 	public float getSoundVolReductionAmount()
 	{
-		return 20.0F;
+		double factor = 1-curData.atmosphericPressure;
+		if(factor < 0) factor = 0;
+		return (float) (20.0*factor);
 	}
 
 	@Override
 	public float getThermalLevelModifier() {
-		// TODO Auto-generated method stub
-		return 0;
+		// TODO do trial&error with that
+		return (float) (curData.temperature-1); // maybe also divide it by something?
 	}
 
 	@Override
 	public float getWindLevel() {
-		return 0;
+		return (float) curData.atmosphericPressure;
 	}
 
 	@Override
 	public CelestialBody getCelestialBody() {
-		return ProceduralGalaxy.moonTutorial;
+		return ProceduralGalaxy.instance.getSolarSystemManager().getCelestialBodyByDimId(dimensionId);
 	}
 
 	@Override
 	public Vector3 getFogColor() {
-		return new Vector3(0, 0, 0);
+		// I need to calculate that from the atmosphere
+		return GasDataLookup.getAtmosphereColor(curData.atmosphere);
 	}
 
 	@Override
 	public Vector3 getSkyColor() {
-		return new Vector3(0, 0, 0);
+		return GasDataLookup.getAtmosphereColor(curData.atmosphere);
 	}
+	
 
 	@Override
 	public boolean canRainOrSnow() {
@@ -85,13 +109,12 @@ public class TutorialWorldProvider extends WorldProviderSpace implements IGalact
 	@Override
 	public boolean hasSunset() {
 		// TODO Auto-generated method stub
-		return false;
+		return true;
 	}
 
 	@Override
 	public long getDayLength() {
-		// 24000
-		return 256000L;
+		return curData.dayLength;
 	}
 
 	@Override
@@ -101,7 +124,7 @@ public class TutorialWorldProvider extends WorldProviderSpace implements IGalact
 
 	@Override
 	public Class<? extends IChunkProvider> getChunkProviderClass() {
-		return TutorialChunkProvider.class;
+		return DynamicPlanetChunkProvider.class;
 	}
 
 	@Override
@@ -111,7 +134,10 @@ public class TutorialWorldProvider extends WorldProviderSpace implements IGalact
 
 	@Override
 	public double getSolarEnergyMultiplier() {
-		return 5;
+		// sunBrightness = 1, pressure = 1 => multiplier 1
+		// with pressure = 0, 1.5
+		// curData.sunBrightness
+		return 2*curData.sunBrightness - curData.atmosphericPressure*0.5;
 	}
 	
 	@Override

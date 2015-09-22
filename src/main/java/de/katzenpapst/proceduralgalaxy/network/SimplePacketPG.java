@@ -10,6 +10,7 @@ import micdoodle8.mods.galacticraft.core.network.NetworkUtil;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.nbt.NBTTagCompound;
 import micdoodle8.mods.galacticraft.core.network.IPacket;
 import micdoodle8.mods.galacticraft.core.util.PlayerUtil;
 import cpw.mods.fml.relauncher.Side;
@@ -28,6 +29,7 @@ public class SimplePacketPG implements IPacket {
         S_GENERATE_SOLAR_SYSTEM(Side.SERVER, String.class),
         
         // CLIENT
+        C_LOAD_SYSTEMS(Side.CLIENT, NBTTagCompound.class),
         C_SOLAR_SYSTEM_GENERATED(Side.CLIENT, SolarSystemData.class),
         C_SOLAR_SYSTEM_GENERATION_FAILED(Side.CLIENT, CannotGenerateException.class);
     
@@ -113,8 +115,11 @@ public class SimplePacketPG implements IPacket {
 		case C_SOLAR_SYSTEM_GENERATION_FAILED:
 			
 			break;
-		default:
+		case C_LOAD_SYSTEMS:
+			NBTTagCompound data =  (NBTTagCompound)this.data.get(0);
+			ProceduralGalaxy.instance.getSolarSystemManager().readFromNBT(data);
 			break;
+		default:
 		}
 
 	}

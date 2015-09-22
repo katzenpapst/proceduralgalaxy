@@ -35,7 +35,6 @@ public class ConfigManager {
 	
 	protected ArrayList<String> starNames = null;
 	protected int defaultPlanetTier = 3;
-	protected int defaultMoonTier = 3;
 	
 	protected float habitableZoneWidth = 1;
 	
@@ -62,7 +61,7 @@ public class ConfigManager {
         
 
 		defaultPlanetTier = config.getInt("defaultPlanetTier", Configuration.CATEGORY_GENERAL, defaultPlanetTier, 1, 100, "Default tier for planets. You might want to change this if you have a mod which adds higher-tier rockets");
-		defaultMoonTier = config.getInt("defaultMoonTier", Configuration.CATEGORY_GENERAL, defaultMoonTier, 1, 100, "Default tier for moons. You might want to change this if you have a mod which adds higher-tier rockets");
+	
 		
 		minNumPlanets = config.getInt("minNumPlanets", Configuration.CATEGORY_GENERAL, minNumPlanets, 0, 10, "Minimum number of planets in a solar system");
 		maxNumPlanets = config.getInt("maxNumPlanets", Configuration.CATEGORY_GENERAL, maxNumPlanets, minNumPlanets, 20, "Maximum number of planets in a solar system");
@@ -155,10 +154,6 @@ public class ConfigManager {
         buffer.close();
         input.close();
         stream.close();
-	}
-	
-	public int getMoonTier() {
-		return defaultMoonTier;
 	}
 	
 	public int getPlanetTier() {

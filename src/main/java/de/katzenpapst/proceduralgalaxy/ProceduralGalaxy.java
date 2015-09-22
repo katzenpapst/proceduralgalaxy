@@ -40,10 +40,13 @@ import de.katzenpapst.proceduralgalaxy.data.SolarSystemData;
 import de.katzenpapst.proceduralgalaxy.data.StarData;
 import de.katzenpapst.proceduralgalaxy.exception.CannotGenerateException;
 import de.katzenpapst.proceduralgalaxy.gui.GuiHandler;
+import de.katzenpapst.proceduralgalaxy.network.ConnectionEvents;
+import de.katzenpapst.proceduralgalaxy.network.ConnectionPacket;
 import de.katzenpapst.proceduralgalaxy.network.PGChannelHandler;
 import de.katzenpapst.proceduralgalaxy.network.SimplePacketPG;
 import de.katzenpapst.proceduralgalaxy.tick.TickHandlerServer;
 import de.katzenpapst.proceduralgalaxy.worldgen.SolarSystemGenerator;
+import de.katzenpapst.proceduralgalaxy.worldgen.SolarSystemManager;
 import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicMoon;
 import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicPlanet;
 import de.katzenpapst.proceduralgalaxy.worldgen.celestial.DynamicSolarSystem;
@@ -58,6 +61,7 @@ public class ProceduralGalaxy {
     public static final String ASSET_PREFIX = MODID;
     
     protected ConfigManager configMgr;
+    protected SolarSystemManager solarSystemMgr;
     
     public static Moon moonTutorial;
     public Star starRa;
@@ -75,65 +79,18 @@ public class ProceduralGalaxy {
     @EventHandler
     public void init(FMLInitializationEvent event)
     {
+    	solarSystemMgr = new SolarSystemManager();
+    	
         TestBlock b = new TestBlock();
         GameRegistry.registerBlock(b, "blockObservatory");
-    	createCelestialObjects();
         
         channelHandler = PGChannelHandler.init();
+        
+        FMLCommonHandler.instance().bus().register(new ConnectionEvents());
     }
     
-    private void createCelestialObjects() {
-    	systemRa = new SolarSystem("systemRa", "milkyWay").setMapPosition(new Vector3(2.5F, -1.15F, 0.0F));
-    	
-    	starRa = new Star("sunRa").setParentSolarSystem(systemRa);
-    	starRa.setBodyIcon(new ResourceLocation(ASSET_PREFIX, "textures/gui/celestialbodies/sun-red2.png"));
-    	starRa.setRelativeSize(1);
-    	starRa.setTierRequired(-1);
-    	
-    	systemRa.setMainStar(starRa);
-    	
-    	
-    	
-    	
-    	
-    	
-    	// planets
-    	
-    	
-    	Planet planetOsiris = makePlanet("osiris", "planet-desert.png", 0.5F, 0.25F, 3, 0.5F);
-    	
-    	planetOsiris.setParentSolarSystem(systemRa);
- 
-    	//planetOsiris.setRelativeSize(0.1F);
-    	
-    	starAmun = makePlanet("sunAmun", "sun-white.png", (float) Math.PI*3/4, 0.4F, 3, 9F);
-    	starAmun.setParentSolarSystem(systemRa);
-    	
-    	Planet planetBaal = makePlanet("baal", "planet-gas02.png", (float)Math.PI*1/9, 0.7F, 3, 9F);
-    	planetBaal.setParentSolarSystem(systemRa);
-    	
-    	Planet planetAnubis = makePlanet("anubis", "planet-desert.png", (float)Math.PI*4/5, 2F, 3, 9F);
-    	planetAnubis.setParentSolarSystem(systemRa);
-    	
-    	GalaxyRegistry.registerSolarSystem(systemRa);
-    	GalaxyRegistry.registerPlanet(planetAnubis);
-    	GalaxyRegistry.registerPlanet(starAmun);
-    	GalaxyRegistry.registerPlanet(planetBaal);
-    	GalaxyRegistry.registerPlanet(planetOsiris);
-    }
     
-    private Planet makePlanet(String name, String texture, float phaseShift, float distance, int tier, float orbitTime) {
-    	String textureName = "textures/gui/celestialbodies/";
-    	textureName = textureName.concat(texture);
-    	Planet result = new Planet(name);
-    	result.setBodyIcon(new ResourceLocation(ASSET_PREFIX, textureName));
-    	result.setPhaseShift(phaseShift);
-    	result.setRelativeDistanceFromCenter(new ScalableDistance(distance, distance));
-    	result.setTierRequired(tier);
-    	result.setRelativeOrbitTime(orbitTime);
-    	return result;
-    	
-    }
+    
     
     public PGChannelHandler getChannelHandler() {
     	return channelHandler;
@@ -141,6 +98,13 @@ public class ProceduralGalaxy {
     
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
+    	// ConnectionPacket.bus = NetworkRegistry.INSTANCE.newEventDrivenChannel(ConnectionPacket.CHANNEL);
+    	ConnectionPacket.bus = NetworkRegistry.INSTANCE.newChannel(ConnectionPacket.CHANNEL, new ConnectionPacket());
+    	
+    	/*
+    	 * this.channels = NetworkRegistry.INSTANCE.newChannel(ModInfo.CHANNEL, this);
+    	 * */
+    	// ConnectionPacket.bus.register(new ConnectionEvents());
     	configMgr = new ConfigManager(event.getModConfigurationDirectory());
     }
     
@@ -154,6 +118,13 @@ public class ProceduralGalaxy {
     	NetworkRegistry.INSTANCE.registerGuiHandler(ProceduralGalaxy.instance, new GuiHandler());
     	FMLCommonHandler.instance().bus().register(new TickHandlerServer());
     	//event.getSide().isServer()
+    	
+    	// not sure if I even can do this here...
+    	GalacticraftRegistry.registerTeleportType(DynamicPlanetWorldProvider.class, new DynamicLanderBasedTeleportType());
+    }
+    
+    public SolarSystemManager getSolarSystemManager() {
+    	return solarSystemMgr;
     }
 
     /**
@@ -164,7 +135,7 @@ public class ProceduralGalaxy {
      */
     synchronized public SolarSystem createNewSolarSystem(EntityPlayerMP forUser) {
 	    try{
-	    	DynamicSolarSystem sys = TickHandlerServer.ssData.generateNew(forUser.getUniqueID());
+	    	DynamicSolarSystem sys = getSolarSystemManager().generateNew(forUser.getUniqueID());
 	    	ProceduralGalaxy.instance.getChannelHandler().sendToPlayer(new SimplePacketPG(
 	    				SimplePacketPG.EnumSimplePacketPG.C_SOLAR_SYSTEM_GENERATED,
 	    				new Object[] {
